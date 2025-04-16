@@ -10,7 +10,7 @@ import { fetchCart } from "@/lib/api";
 import { relatedCart } from "@/lib/mockData";
 
 const CartPage: React.FC = () => {
-  const IsRegistered = localStorage.getItem("IsRegistered");
+  const IsRegistered = true;
   const [cartItems, setCartItems] = useState<CartType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [promoCode, setPromoCode] = useState("");
