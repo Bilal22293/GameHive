@@ -1,4 +1,4 @@
-export const GlitchText = ({ text, className = "" }) => {
+export const GlitchText = ({ text, className = "" }: any) => {
     return (
       <div className={`relative ${className}`}>
         <span className="inline-block relative z-10">{text}</span>
