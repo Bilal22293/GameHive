@@ -22,7 +22,7 @@ export default function ProductDetailPage() {
   console.log(id);
   const productId = id as string;
 
-  const IsRegistered = localStorage.getItem("IsRegistered");
+  const IsRegistered = true;
   const [product, setProduct] = useState<ProductType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
