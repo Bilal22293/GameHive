@@ -212,28 +212,6 @@ const CartPage: React.FC = () => {
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     className="bg-card rounded-lg mb-4 overflow-hidden shadow-lg relative group"
                   >
-                    {/* View details overlay button */}
-                    <div className="absolute right-4 top-4 z-10">
-                      <button
-                        onClick={() => router.push(`/item?id=${product.id}`)}
-                        className="bg-primary text-primary-foreground px-3 py-1 rounded-md text-sm font-medium hover:bg-primary/90 transition-all duration-300 flex items-center shadow-lg cta-glow"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                          <path
-                            fillRule="evenodd"
-                            d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        View Details
-                      </button>
-                    </div>
 
                     <div className="grid grid-cols-12 p-4">
                       {/* Image section with click handler and visual indicator */}
