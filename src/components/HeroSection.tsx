@@ -39,8 +39,8 @@ const HeroSection = ({ scrollToCategories}: HeroSectionProps) => {
     },
     {
       id: 3,
-      heading: "GAMING ACCESSORIES",
-      subheading: "Complete your setup with our high-quality peripherals",
+      heading: "GAMING LAPTOPS",
+      subheading: "Complete your setup with our high-quality laptops",
       image: "/pc.png",
       video: "/videos/accessories-showcase.mp4",
       useVideo: false,

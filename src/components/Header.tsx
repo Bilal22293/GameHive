@@ -273,7 +273,7 @@ export default function Header() {
                   <span className="cyberpunk-text group-hover:neon-text transition-all duration-300">PRODUCTS</span>
                 </Link>
                 
-                <Link
+                {/* <Link
                   href="/contact"
                   className="px-6 py-3 text-foreground hover:text-primary hover:bg-muted transition-all duration-300 flex items-center group"
                   onClick={() => setMobileMenuOpen(false)}
@@ -284,7 +284,7 @@ export default function Header() {
                     </svg>
                   </span>
                   <span className="cyberpunk-text group-hover:neon-text transition-all duration-300">CONTACT</span>
-                </Link>
+                </Link> */}
               </div>
             </div>
           </div>
