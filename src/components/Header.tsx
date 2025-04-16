@@ -14,11 +14,14 @@ export default function Header() {
 
   const { IsRegistered, setIsRegistered } = useGlobalState();
   console.log(IsRegistered, isTrue)
-  if(IsRegistered){
-    localStorage.setItem("IsRegistered", IsRegistered.toString());
+  if(typeof localStorage === 'undefined'){
     isTrue = true;
   }
-  if(localStorage.getItem("IsRegistered") === "true"){
+  else if(localStorage.getItem("IsRegistered") === "true"){
+    isTrue = true;
+  }
+  else if(IsRegistered){
+    localStorage.setItem("IsRegistered", IsRegistered.toString());
     isTrue = true;
   }
   const pathname = usePathname();

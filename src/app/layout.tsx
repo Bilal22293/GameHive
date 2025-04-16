@@ -25,7 +25,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <div className="flex flex-col min-h-screen ">
-          <ClientWrapper appSessionId={APP_SESSION_ID}>
+          <ClientWrapper>
             <GlobalStateProvider>
               <main className="flex-grow">
                 <Header />
