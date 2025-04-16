@@ -9,9 +9,9 @@ import { fetchProductById, addToCart } from "@/lib/api";
 import { RelatedProducts } from "@/components/RelatedProducts";
 import { ProductReviews } from "@/components/ProductReviews";
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGlobalState } from "@/context/GlobalStateContext";
+// import { useGlobalState } from "@/context/GlobalStateContext";
 import { X, Check } from "lucide-react";
-import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
+// import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
 
 
 export default function ProductDetailPage() {

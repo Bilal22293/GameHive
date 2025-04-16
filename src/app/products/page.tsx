@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ProductsPage() {
-  const router = useRouter();
+  // const router = useRouter();
   const searchParams = useSearchParams();
   const category = searchParams.get('category');
   const search = searchParams.get('search');
