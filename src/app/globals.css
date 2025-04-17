@@ -71,6 +71,7 @@ body {
   background-attachment: fixed;
   min-height: 100vh;
   overflow-x: hidden;
+  background-color: var(--background);
 }
 
 /* Add a subtle glow effect to highlight CTA elements */

@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="flex flex-col min-h-screen ">
+        <div className="flex flex-col min-h-screen bg-background ">
           <ClientWrapper>
             <GlobalStateProvider>
               <main className="flex-grow">
