@@ -182,17 +182,6 @@ export const cart: CartType[] = [
     onSale: true,
     quantity: 1,
   },
-  {
-    id: "11",
-    name: "Logitech Gaming Headset",
-    images: ["/products/11/1.jpg", "/products/11/2.jpg"],
-    price: 99,
-    originalPrice: 119,
-    rating: 4.6,
-    reviewCount: 1100,
-    onSale: true,
-    quantity: 1,
-  },
 ];
 
 export const products: ProductType[] = [

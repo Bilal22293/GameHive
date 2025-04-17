@@ -4,15 +4,20 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 type GlobalStateType = {
   IsRegistered: boolean | null;
   setIsRegistered: (id: boolean | null) => void;
+  cartItemCount: number;
+  setCartItemCount: (count: number) => void;
 };
 
 const GlobalStateContext = createContext<GlobalStateType | undefined>(undefined);
 
 export const GlobalStateProvider = ({ children }: { children: ReactNode }) => {
   const [IsRegistered, setIsRegistered] = useState<boolean | null>(false);
+  const [cartItemCount, setCartItemCount] = useState<number>(4);
 
   return (
-    <GlobalStateContext.Provider value={{ IsRegistered, setIsRegistered }}>
+    <GlobalStateContext.Provider
+      value={{ IsRegistered, setIsRegistered, cartItemCount, setCartItemCount }}
+    >
       {children}
     </GlobalStateContext.Provider>
   );

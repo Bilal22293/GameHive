@@ -1,7 +1,7 @@
 // File: src/app/products/[id]/page.tsx (Product Detail Page)
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ProductType } from "@/types";
@@ -9,13 +9,14 @@ import { fetchProductById, addToCart } from "@/lib/api";
 import { RelatedProducts } from "@/components/RelatedProducts";
 import { ProductReviews } from "@/components/ProductReviews";
 import { motion, AnimatePresence } from 'framer-motion';
-// import { useGlobalState } from "@/context/GlobalStateContext";
+import { useGlobalState } from "@/context/GlobalStateContext";
 import { X, Check } from "lucide-react";
 // import { is } from "@react-three/fiber/dist/declarations/src/core/utils";
 
 
 export default function ProductDetailPage() {
 
+  const {cartItemCount, setCartItemCount} = useGlobalState();
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = searchParams.get('id');
@@ -30,6 +31,12 @@ export default function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState("description");
   const [animationStarted, setAnimationStarted] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  
+  // For swipe functionality
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  const minSwipeDistance = 50;
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -52,11 +59,92 @@ export default function ProductDetailPage() {
     }
   }, [productId]);
 
+  // Handle swipe start
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  // Handle swipe move
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  // Handle swipe end
+  const handleTouchEnd = () => {
+    if (!product) return;
+    
+    if (touchStart && touchEnd) {
+      const distance = touchStart - touchEnd;
+      
+      if (Math.abs(distance) > minSwipeDistance) {
+        if (distance > 0) {
+          // Swipe left - next image
+          setSelectedImage((prev) => 
+            prev === product.images.length - 1 ? 0 : prev + 1
+          );
+        } else {
+          // Swipe right - previous image
+          setSelectedImage((prev) => 
+            prev === 0 ? product.images.length - 1 : prev - 1
+          );
+        }
+      }
+    }
+    
+    // Reset touch points
+    setTouchStart(0);
+    setTouchEnd(0);
+  };
+
+  // For mouse drag (desktop swipe alternative)
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState(0);
+  const [dragEnd, setDragEnd] = useState(0);
+  
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart(e.clientX);
+  };
+  
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      setDragEnd(e.clientX);
+    }
+  };
+  
+  const handleMouseUp = () => {
+    if (!product) return;
+    
+    if (isDragging && dragStart && dragEnd) {
+      const distance = dragStart - dragEnd;
+      
+      if (Math.abs(distance) > minSwipeDistance) {
+        if (distance > 0) {
+          // Drag left - next image
+          setSelectedImage((prev) => 
+            prev === product.images.length - 1 ? 0 : prev + 1
+          );
+        } else {
+          // Drag right - previous image
+          setSelectedImage((prev) => 
+            prev === 0 ? product.images.length - 1 : prev - 1
+          );
+        }
+      }
+    }
+    
+    // Reset drag state
+    setIsDragging(false);
+    setDragStart(0);
+    setDragEnd(0);
+  };
+
   const handleAddToCart = () => {
     // Implement add to cart functionality
     if (IsRegistered) {
       addToCart(productId, quantity);
       console.log("Adding to cart:", product?.id, "quantity:", quantity);
+      setCartItemCount(cartItemCount + 1);
       setShowToast(true);
     }
     else{
@@ -129,17 +217,58 @@ export default function ProductDetailPage() {
                 animationStarted ? "animate-slideInLeft" : "opacity-0"
               }`}
             >
-              <div className="relative h-96 mb-4 bg-card rounded-lg overflow-hidden group">
-                <Image
-                  src={
-                    product.images[selectedImage] || "/api/placeholder/600/600"
-                  }
-                  alt={product.name}
-                  fill
-                  className="object-contain transition-transform duration-500 group-hover:scale-105"
-                />
+              <div 
+                ref={imageContainerRef}
+                className="relative h-96 mb-4 bg-card rounded-lg overflow-hidden group cursor-grab"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+              >
+                <AnimatePresence initial={false} mode="wait">
+                  <motion.div
+                    key={selectedImage}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute inset-0"
+                  >
+                    <Image
+                      src={
+                        product.images[selectedImage] || "/api/placeholder/600/600"
+                      }
+                      alt={product.name}
+                      fill
+                      className="object-contain"
+                    />
+                  </motion.div>
+                </AnimatePresence>
                 <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                
+                {/* Swipe indicator overlay */}
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center pointer-events-none">
+                  <div className="bg-black/40 px-3 py-1 rounded-full text-xs text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
+                    Swipe to view more images
+                  </div>
+                </div>
+                
+                {/* Image position indicators */}
+                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 pointer-events-none">
+                  {product.images.map((_, index) => (
+                    <div 
+                      key={index} 
+                      className={`h-1 rounded-full transition-all duration-300 ${
+                        selectedImage === index ? "w-6 bg-primary" : "w-2 bg-white/50"
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
+              
               <div className="grid grid-cols-4 gap-2">
                 {product.images.map((image, index) => (
                   <div
@@ -403,23 +532,23 @@ export default function ProductDetailPage() {
         </div>
       </div>
       <AnimatePresence>
-  {showToast && (
-    <motion.div
-      initial={{ opacity: 0, y: 20, x: "-50%" }}
-      animate={{ opacity: 1, y: 0, x: "-50%" }}
-      exit={{ opacity: 0, y: -20, x: "-50%" }}
-      transition={{ duration: 0.3 }}
-      className="fixed bottom-8 left-1/2 cta-glow bg-primary text-primary-foreground px-4 py-3 w-80 rounded-lg shadow-lg z-50 flex items-center"
-    >
-      {IsRegistered ? (
-        <Check className="mr-2" size={20} color="black" />
-      ) : (
-        <X className="mr-2" size={20} color="black" />
-      )}
-      {IsRegistered ?`Item added to cart` : `Please login to add items to cart`}
-    </motion.div>
-  )}
-</AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: -20, x: "-50%" }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-8 left-1/2 cta-glow bg-primary text-primary-foreground px-4 py-3 w-80 rounded-lg shadow-lg z-50 flex items-center"
+          >
+            {IsRegistered ? (
+              <Check className="mr-2" size={20} color="black" />
+            ) : (
+              <X className="mr-2" size={20} color="black" />
+            )}
+            {IsRegistered ? `Item added to cart` : `Please login to add items to cart`}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

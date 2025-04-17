@@ -27,6 +27,7 @@ export default function ProductClient() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const initialRenderRef = useRef(true);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Update filters when category URL param changes
   useEffect(() => {
@@ -141,6 +142,38 @@ export default function ProductClient() {
     setFilteredProducts(result);
   }, [products, filters, sortOption]);
 
+  // Effect to handle click outside of sidebar to close it on mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (mobileFiltersOpen && 
+          sidebarRef.current && 
+          !sidebarRef.current.contains(event.target as Node)) {
+        setMobileFiltersOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileFiltersOpen]);
+
+  // Effect to prevent body scrolling when sidebar is open
+  useEffect(() => {
+    if (mobileFiltersOpen) {
+      // Prevent scrolling on the body when sidebar is open
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Restore scrolling when sidebar is closed
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      // Cleanup: restore scrolling when component unmounts
+      document.body.style.overflow = '';
+    };
+  }, [mobileFiltersOpen]);
+
   const handleFilterChange = (newFilters: FilterOptionsType) => {
     setFilters(newFilters);
   };
@@ -172,8 +205,46 @@ export default function ProductClient() {
     }
   };
 
+  // Sidebar animation variants
+  const sidebarVariants = {
+    open: { 
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30
+      }
+    },
+    closed: { 
+      x: "-100%",
+      opacity: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30
+      }
+    }
+  };
+
+  // Overlay animation variants
+  const overlayVariants = {
+    open: { 
+      opacity: 1,
+      transition: {
+        duration: 0.3
+      }
+    },
+    closed: { 
+      opacity: 0,
+      transition: {
+        duration: 0.3
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 70%, #141414 100%)" }}>
+    <div className="min-h-screen" style={{ background: "linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 70%, var(--background) 100%)" }}>
       {/* Animated grid background */}
       <div className="fixed inset-0 z-0 opacity-20">
         <div className="absolute inset-0" style={{
@@ -183,6 +254,46 @@ export default function ProductClient() {
         }}></div>
       </div>
 
+      {/* Mobile filter sidebar overlay */}
+      {mobileFiltersOpen && (
+        <motion.div 
+          className="fixed inset-0  bg-black/30 backdrop-blur-sm z-50 md:hidden"
+          initial="closed"
+          animate="open"
+          variants={overlayVariants}
+          onClick={() => setMobileFiltersOpen(false)}
+        />
+      )}
+
+      {/* Mobile sidebar - placed outside the main container to ensure full height and proper z-index */}
+      <motion.div 
+        ref={sidebarRef}
+        className="fixed top-0 left-0 h-full w-3/4 max-w-xs bg-card z-50 md:hidden overflow-y-auto shadow-xl"
+        initial="closed"
+        animate={mobileFiltersOpen ? "open" : "closed"}
+        variants={sidebarVariants}
+        style={{ 
+          zIndex: 999, 
+        }}
+      >
+        <div className="p-4 pt-safe">
+          <div className="flex justify-between items-center mb-4 sticky top-0 bg-card py-2">
+            <h3 className="text-lg font-bold">Filters</h3>
+            <button 
+              onClick={() => setMobileFiltersOpen(false)}
+              className="p-2 rounded-full hover:text-[var(--destructive)]"
+              aria-label="Close filters"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <FilterSidebar filters={filters} onFilterChange={handleFilterChange} />
+        </div>
+      </motion.div>
+
       <div className="container mx-auto px-4 py-8 relative z-10">
         <h1 className="text-3xl font-bold mb-2 text-[var(--primary)] text-center text-glow animate-fadeIn">
           All Products
@@ -190,11 +301,11 @@ export default function ProductClient() {
         <div className="section-divider mb-8 animate-fadeIn"></div>
 
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Mobile filter dialog */}
+          {/* Mobile filter button */}
           <button
             type="button"
             className="md:hidden inline-flex items-center px-4 py-2 border border-muted rounded-md bg-card text-foreground mb-4 hover:bg-muted transition-all duration-300 cta-glow animate-fadeIn"
-            onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+            onClick={() => setMobileFiltersOpen(true)}
           >
             <span className="mr-2">Filters</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -202,10 +313,8 @@ export default function ProductClient() {
             </svg>
           </button>
 
-          {/* Sidebar with filters */}
-          <aside 
-            className={`md:block ${mobileFiltersOpen ? 'block animate-slideInLeft' : 'hidden'} md:w-64 w-full`}
-          >
+          {/* Desktop sidebar */}
+          <aside className="hidden md:block md:w-64 w-full">
             <div className="glass-card rounded-lg p-4 border border-border animate-fadeIn">
               <FilterSidebar filters={filters} onFilterChange={handleFilterChange} />
             </div>
