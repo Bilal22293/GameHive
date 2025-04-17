@@ -1,12 +1,12 @@
 import { motion, useTransform, useScroll, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import {CyberButton} from "./CyberButton";
+import { CyberButton } from "./CyberButton";
 
 interface HeroSectionProps {
-    scrollToCategories: () => void;
-  }
+  scrollToCategories: () => void;
+}
 
-const HeroSection = ({ scrollToCategories}: HeroSectionProps) => {
+const HeroSection = ({ scrollToCategories }: HeroSectionProps) => {
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -18,8 +18,13 @@ const HeroSection = ({ scrollToCategories}: HeroSectionProps) => {
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const slideDuration = 5000; 
+  const slideDuration = 5000;
   
+  // Swipe functionality
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  const minSwipeDistance = 50;
+
   const heroSlides = [
     {
       id: 1,
@@ -46,6 +51,76 @@ const HeroSection = ({ scrollToCategories}: HeroSectionProps) => {
       useVideo: false,
     },
   ];
+
+  // Handle swipe start
+  const handleTouchStart = (e: any) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  // Handle swipe move
+  const handleTouchMove = (e: any) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  // Handle swipe end
+  const handleTouchEnd = () => {
+    if (!isAnimating && touchStart && touchEnd) {
+      const distance = touchStart - touchEnd;
+      if (distance > minSwipeDistance) {
+        // Swipe left
+        setIsAnimating(true);
+        setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      }
+      
+      if (distance < -minSwipeDistance) {
+        // Swipe right
+        setIsAnimating(true);
+        setCurrentSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1));
+      }
+    }
+    
+    // Reset touch points
+    setTouchStart(0);
+    setTouchEnd(0);
+  };
+
+  // For mouse drag (desktop swipe alternative)
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState(0);
+  const [dragEnd, setDragEnd] = useState(0);
+  
+  const handleMouseDown = (e: any) => {
+    setIsDragging(true);
+    setDragStart(e.clientX);
+  };
+  
+  const handleMouseMove = (e: any) => {
+    if (isDragging) {
+      setDragEnd(e.clientX);
+    }
+  };
+  
+  const handleMouseUp = () => {
+    if (isDragging && dragStart && dragEnd) {
+      const distance = dragStart - dragEnd;
+      if (distance > minSwipeDistance && !isAnimating) {
+        // Drag left
+        setIsAnimating(true);
+        setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      }
+      
+      if (distance < -minSwipeDistance && !isAnimating) {
+        // Drag right
+        setIsAnimating(true);
+        setCurrentSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1));
+      }
+    }
+    
+    // Reset drag state
+    setIsDragging(false);
+    setDragStart(0);
+    setDragEnd(0);
+  };
 
   // Auto-advance slides
   useEffect(() => {
@@ -77,6 +152,13 @@ const HeroSection = ({ scrollToCategories}: HeroSectionProps) => {
       ref={heroRef}
       className="relative overflow-hidden"
       style={{ height: "100vh" }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
     >
       {/* Background Slider */}
       <AnimatePresence mode="wait">
@@ -116,6 +198,13 @@ const HeroSection = ({ scrollToCategories}: HeroSectionProps) => {
           )
         ))}
       </AnimatePresence>
+
+      {/* Swipe indicator overlay - shows briefly on initial load */}
+      <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center opacity-0 animate-fadeOut">
+        <div className="bg-black/20 p-4 rounded-xl backdrop-blur-sm">
+          <div className="text-white/80 text-lg font-light">Swipe to navigate</div>
+        </div>
+      </div>
 
       {/* Cyberpunk grid overlay */}
       <div className="absolute inset-0 bg-grid-pattern opacity-20 z-1" />
@@ -179,6 +268,7 @@ const HeroSection = ({ scrollToCategories}: HeroSectionProps) => {
         </div>
       </div>
 
+
       {/* Fixed and properly centered slide navigation dots */}
       <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-3 z-20">
         {heroSlides.map((_, index) => (
@@ -200,7 +290,6 @@ const HeroSection = ({ scrollToCategories}: HeroSectionProps) => {
         className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/90 to-transparent"
         style={{ opacity: scrollYProgress }}
       />
-
     </motion.div>
   );
 };
