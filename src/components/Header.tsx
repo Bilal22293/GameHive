@@ -1,37 +1,36 @@
-// File: src/components/Header.tsx
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { GlitchText } from "./GlitchText";
-import { useGlobalState } from "@/context/GlobalStateContext";
-import { Search, Menu, X, ShoppingCart, User } from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { GlitchText } from './GlitchText';
+import { useGlobalState } from '@/context/GlobalStateContext';
+import { Search, Menu, X, ShoppingCart, User, CreditCard } from 'lucide-react';
 
 var isTrue = false;
 export default function Header() {
-  const {cartItemCount, setCartItemCount} = useGlobalState();
+  const { cartItemCount, setCartItemCount } = useGlobalState();
   const { IsRegistered, setIsRegistered } = useGlobalState();
   console.log(IsRegistered, isTrue);
-  if (typeof localStorage === "undefined") {
+  if (typeof localStorage === 'undefined') {
     isTrue = true;
-  } else if (localStorage.getItem("IsRegistered") === "true") {
+  } else if (localStorage.getItem('IsRegistered') === 'true') {
     isTrue = true;
   } else if (IsRegistered) {
-    localStorage.setItem("IsRegistered", IsRegistered.toString());
+    localStorage.setItem('IsRegistered', IsRegistered.toString());
     isTrue = true;
   }
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const modalRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Check if current page is signin or signup
-  const isAuthPage = pathname === "/signin" || pathname === "/signup";
+  const isAuthPage = pathname === '/signin' || pathname === '/signup';
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -44,11 +43,11 @@ export default function Header() {
     };
 
     if (searchOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [searchOpen]);
 
@@ -70,10 +69,10 @@ export default function Header() {
       {/* Main header */}
       <div
         className={` ${
-          pathname === "/"
-            ? "fixed left-0 top-0 backdrop-blur-md bg-background/70"
-            : "bg-transparent"
-        }  w-full px-6 lg:px-14`}
+          pathname === '/'
+            ? 'fixed left-0 top-0 backdrop-blur-md bg-background/70'
+            : 'bg-transparent'
+        } w-full px-6 lg:px-14`}
       >
         <div className="flex items-center justify-between py-3">
           {/* Logo */}
@@ -87,75 +86,57 @@ export default function Header() {
           {/* Header Actions - only show if not on auth pages */}
           {!isAuthPage && (
             <div className="flex items-center space-x-5">
-              {isTrue ? (
-                // Show these icons when user is registered
-                <>
-                  {/* Search Button */}
-                  <button
-                    onClick={() => setSearchOpen(!searchOpen)}
-                    className="text-foreground hover:text-primary transition-all duration-300 relative overflow-hidden group"
-                    aria-label="Search"
-                  >
-                    <Search className="h-6 w-6" />
-                    <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary group-hover:w-full transition-all duration-300"></span>
-                  </button>
+              {/* Search Button */}
+              <button
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="text-foreground hover:text-primary transition-all duration-300 relative overflow-hidden group"
+                aria-label="Search"
+              >
+                <Search className="h-6 w-6" />
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary group-hover:w-full transition-all duration-300"></span>
+              </button>
 
-                  {/* Cart Button */}
-                  <Link
-                    href="/cart"
-                    className="text-foreground hover:text-primary transition-all duration-300 relative overflow-visible group"
-                    aria-label="Cart"
-                  >
-                    <div className="relative">
-                      <ShoppingCart className="h-6 w-6" />
-                      {cartItemCount > 0 && (
-                        <span className="absolute -top-1 -right-2 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-3 w-3 p-2 flex items-center justify-center">
-                          {cartItemCount}
-                        </span>
-                      )}
-                    </div>
-                    <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary group-hover:w-full transition-all duration-300"></span>
-                  </Link>
+              {/* Cart Button */}
+              <Link
+                href="/cart"
+                className="text-foreground hover:text-primary transition-all duration-300 relative overflow-visible group"
+                aria-label="Cart"
+              >
+                <div className="relative">
+                  <ShoppingCart className="h-6 w-6" />
+                  {cartItemCount > 0 && (
+                    <span className="absolute -top-1 -right-2 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-3 w-3 p-2 flex items-center justify-center">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </div>
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary group-hover:w-full transition-all duration-300"></span>
+              </Link>
 
-                  {/* Profile Button */}
-                  <Link
-                    href="/profile"
-                    className="text-foreground hover:text-primary transition-all duration-300 relative overflow-hidden group"
-                    aria-label="Profile"
-                  >
-                    <User className="h-6 w-6" />
-                    <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary group-hover:w-full transition-all duration-300"></span>
-                  </Link>
-                </>
-              ) : (
-                // Show these icons when user is not registered
-                <>
-                  {/* Search Button */}
-                  <button
-                    onClick={() => setSearchOpen(!searchOpen)}
-                    className="text-foreground hover:text-primary transition-all duration-300 relative overflow-hidden group"
-                    aria-label="Search"
-                  >
-                    <Search className="h-6 w-6" />
-                    <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary group-hover:w-full transition-all duration-300"></span>
-                  </button>
+              {/* Profile Button */}
+              <Link
+                href="/profile"
+                className="text-foreground hover:text-primary transition-all duration-300 relative overflow-hidden group"
+                aria-label="Profile"
+              >
+                <User className="h-6 w-6" />
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary group-hover:w-full transition-all duration-300"></span>
+              </Link>
 
-                  {/* Menu Button */}
-                  <button
-                    type="button"
-                    className="text-foreground hover:text-primary transition-all duration-300 relative overflow-hidden group"
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    aria-label="Menu"
-                  >
-                    {mobileMenuOpen ? (
-                      <X className="h-6 w-6" />
-                    ) : (
-                      <Menu className="h-6 w-6" />
-                    )}
-                    <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary group-hover:w-full transition-all duration-300"></span>
-                  </button>
-                </>
-              )}
+              {/* Menu Button */}
+              <button
+                type="button"
+                className="text-foreground hover:text-primary transition-all duration-300 relative overflow-hidden group"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Menu"
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-primary group-hover:w-full transition-all duration-300"></span>
+              </button>
             </div>
           )}
         </div>
@@ -163,7 +144,7 @@ export default function Header() {
 
       {/* Search Modal */}
       {searchOpen && (
-        <div className="fixed inset-0  bg-opacity-90 z-50 flex items-start justify-center pt-24 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-opacity-90 z-50 flex items-start justify-center pt-24 backdrop-blur-sm">
           <div className="w-full max-w-2xl px-6 relative" ref={modalRef}>
             <form onSubmit={handleSearch} className="neon-border">
               <div className="bg-card p-2 rounded-xl relative overflow-hidden">
@@ -245,7 +226,7 @@ export default function Header() {
           {/* Menu overlay with futuristic styling */}
           <div
             ref={menuRef}
-            className="fixed right-6 top-20 z-50 w-64 rounded-lg overflow-hidden neon-border scanning-effect"
+            className="fixed right-6 top-20 z-50 w-64 rounded-lg overflow-hidden neon-border scanning-effect animate-slideInRight"
           >
             <div className="bg-card py-4 hud-container">
               <div className="hud-corner hud-corner-top-left"></div>
@@ -258,7 +239,7 @@ export default function Header() {
                   className="px-6 py-3 text-foreground hover:text-primary hover:bg-muted transition-all duration-300 flex items-center group"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    window.location.href = "/signup";
+                    window.location.href = '/signup';
                   }}
                 >
                   <span className="mr-3 text-primary">
@@ -285,7 +266,7 @@ export default function Header() {
                   className="px-6 py-3 text-foreground hover:text-primary hover:bg-muted transition-all duration-300 flex items-center group"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    window.location.href = "/signin";
+                    window.location.href = '/signin';
                   }}
                 >
                   <span className="mr-3 text-primary">
@@ -299,7 +280,7 @@ export default function Header() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth="2"
-                        d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                        d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 01-3-3h7a3 3 0 013 3v1"
                       ></path>
                     </svg>
                   </span>
@@ -337,18 +318,18 @@ export default function Header() {
                   </span>
                 </Link>
 
-                {/* <Link
-                  href="/contact"
+                <Link
+                  href="/plans"
                   className="px-6 py-3 text-foreground hover:text-primary hover:bg-muted transition-all duration-300 flex items-center group"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span className="mr-3 text-primary">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
+                    <CreditCard className="w-5 h-5" />
                   </span>
-                  <span className="cyberpunk-text group-hover:neon-text transition-all duration-300">CONTACT</span>
-                </Link> */}
+                  <span className="cyberpunk-text group-hover:neon-text transition-all duration-300">
+                    SUBSCRIPTIONS
+                  </span>
+                </Link>
               </div>
             </div>
           </div>
